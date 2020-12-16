@@ -1,0 +1,57 @@
+#导入相关库
+import requests
+from lxml import etree
+import os
+
+#设置模拟
+kv = {
+        'user-agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36'
+    }
+
+#输入
+sr = input('请输入想要的表情包关键词：')
+
+#循环出网页url
+for i in range(1,21,1):
+    url = 'https://www.fabiaoqing.com/search/bqb/keyword/' + sr + f'/type/bq/page/{i}.html'
+    print('\n',url)
+
+    #对url进行get和解析
+    r = requests.get(url,headers=kv)                           
+    r.encoding = r.apparent_encoding
+    v = etree.HTML(r.text)
+
+    #get成功进行下一步
+    if r.status_code == 200:
+        
+        #解析出单个表情包url后缀
+        a = v.xpath('//div[@class="searchbqppdiv tagbqppdiv"]/a/@href')
+
+        for i1 in a:
+        
+            #循环合成单个表情包url
+            url1 = 'https://www.fabiaoqing.com' + i1
+
+            #对单个表情包url进行get和解析
+            r1 = requests.get(url1,headers=kv)                             
+            r1.encoding = r1.apparent_encoding
+            v1 = etree.HTML(r1.text)
+
+            #get成功进行下一步
+            if r.status_code == 200:
+
+                #解析出表情包名字
+                b = v1.xpath('//*[@id="bqb"]/div[1]/p/text()')
+
+                #解析出表情包下载url
+                c = v1.xpath('//*[@id="bqb"]/div[1]/div[1]/div/div/div/img/@src')
+                print(b)
+
+                #对解析出的单个表情包url进行下载和储存
+                for i2 in c:
+
+                    #设置保存文件夹
+                    os.chdir(r'E:\表情包\什么情况')
+
+                    #表情包的下载和命名
+                    open(i2[55:],'wb').write(requests.get(i2).content)
